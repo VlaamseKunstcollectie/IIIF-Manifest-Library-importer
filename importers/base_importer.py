@@ -1,3 +1,3 @@
 class BaseImporter:
-    def get_new_manifests(self):
+    def get_manifests(self, from_date=None, until_date=None):
         pass
