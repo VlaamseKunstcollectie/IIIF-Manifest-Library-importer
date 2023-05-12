@@ -2,6 +2,7 @@ import validators
 
 from datetime import datetime
 from importers.base_importer import BaseImporter
+from models.manifest_v3 import ManifestV3
 from oaipmh.client import Client
 from oaipmh.metadata import MetadataRegistry
 
@@ -22,4 +23,5 @@ class OaiPmhImporter(BaseImporter):
         for client in self.clients:
             for record in client.listRecords(metadataPrefix=self.metadata_prefix):
                 for manifest_url in record[1].getField("manifests"):
-                    print(manifest_url)
+                    manifest = ManifestV3.from_url(manifest_url)
+                    print(manifest.as_dict())
