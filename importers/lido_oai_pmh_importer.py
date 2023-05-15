@@ -25,4 +25,4 @@ lido_reader = MetadataReader(
 class LidoOaiPmhImporter(OaiPmhImporter):
     def __init__(self):
         lido_urls = os.getenv("LIDO_URLS", "").split(",")
-        super().__init__(lido_urls, "oai_lido", lido_reader)
+        super().__init__(lido_urls, "oai_lido", lido_reader, "manifests", "types")
