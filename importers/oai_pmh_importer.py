@@ -2,7 +2,7 @@ import validators
 
 from datetime import datetime
 from importers.base_importer import BaseImporter
-from models.manifest_v3 import ManifestV3, NoValidManifest
+from models.manifest import Manifest, NoValidManifest
 from oaipmh.client import Client
 from oaipmh.metadata import MetadataRegistry
 
@@ -25,7 +25,7 @@ class OaiPmhImporter(BaseImporter):
         for record in client.listRecords(metadataPrefix=self.metadata_prefix):
             for manifest_url in record[1].getField(self.manifest_field):
                 try:
-                    manifests.append(ManifestV3.from_url(manifest_url).as_dict())
+                    manifests.append(Manifest.from_url(manifest_url).as_dict())
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")
         return manifests

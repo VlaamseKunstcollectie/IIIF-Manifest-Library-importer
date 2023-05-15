@@ -4,7 +4,12 @@ import urllib.request
 from urllib.error import HTTPError
 
 
-class ManifestV3:
+class Manifest:
+    presentation_contexts = [
+        "http://iiif.io/api/presentation/2/context.json",
+        "http://iiif.io/api/presentation/3/context.json",
+    ]
+
     def __init__(self, manifest):
         self.manifest = manifest
         self.valid_manifest()
@@ -23,10 +28,7 @@ class ManifestV3:
         return cls(manifest)
 
     def valid_manifest(self):
-        if (
-            self.manifest.get("@context")
-            != "http://iiif.io/api/presentation/3/context.json"
-        ):
+        if self.manifest.get("@context") not in self.presentation_contexts:
             raise NoValidManifest("Manifest is not in the valid v3 format")
 
 
