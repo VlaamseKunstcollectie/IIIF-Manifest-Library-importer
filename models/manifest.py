@@ -37,13 +37,27 @@ class Manifest:
         return cls(manifest)
 
     def get_identifiers(self):
-        return list()
+        return [
+            self.get_inventory_number(),
+            self.get_manifest_id(),
+        ]
+
+    def get_inventory_number(self):
+        for item in self.manifest.get("items", list()):
+            for metadata in item.get("metadata", list()):
+                if metadata.get("label", dict()).get("en", [""])[0] == "Inventory no.":
+                    return metadata.get("value", dict()).get("none", [""])[0]
+
+    def get_manifest_id(self):
+        for item in self.manifest.get("items", list()):
+            if "id" in item:
+                return item.get("id")
 
     def get_metadata(self):
         return list()
 
     def get_object_id(self):
-        return str()
+        return self.get_inventory_number()
 
     def valid_manifest(self):
         if self.manifest.get("@context") not in self.presentation_contexts:
