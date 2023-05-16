@@ -17,6 +17,15 @@ class Manifest:
     def as_dict(self):
         return self.manifest
 
+    def as_elody_entity(self):
+        return {
+            "type": "manifest",
+            "object_id": self.get_object_id(),
+            "identifiers": self.get_identifiers(),
+            "metadata": self.get_metadata(),
+            "data": self.manifest,
+        }
+
     @classmethod
     def from_url(cls, manifest_url):
         manifest = dict()
@@ -26,6 +35,15 @@ class Manifest:
         except HTTPError as ex:
             print(f"Couldn't fetch manifest {manifest_url} because of {ex}")
         return cls(manifest)
+
+    def get_identifiers(self):
+        return list()
+
+    def get_metadata(self):
+        return list()
+
+    def get_object_id(self):
+        return str()
 
     def valid_manifest(self):
         if self.manifest.get("@context") not in self.presentation_contexts:

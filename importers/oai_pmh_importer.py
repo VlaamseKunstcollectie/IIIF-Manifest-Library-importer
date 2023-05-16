@@ -44,7 +44,7 @@ class OaiPmhImporter(BaseImporter):
                 manifest_urls = record[1].getField(self.manifest_field)
             for manifest_url in manifest_urls:
                 try:
-                    yield Manifest.from_url(manifest_url).as_dict()
+                    yield Manifest.from_url(manifest_url)
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")
 
