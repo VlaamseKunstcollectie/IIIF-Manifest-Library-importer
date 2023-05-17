@@ -14,6 +14,13 @@ class Manifest:
         self.manifest = manifest
         self.valid_manifest()
 
+    def __decorate_metadata_value(self, key, value, lang="en"):
+        return {
+            "key": key,
+            "value": value,
+            "lang": lang,
+        }
+
     def as_dict(self):
         return self.manifest
 
@@ -54,10 +61,16 @@ class Manifest:
                 return item.get("id")
 
     def get_metadata(self):
-        return list()
+        metadata = list()
+        metadata.extend(self.get_title())
+        return metadata
 
     def get_object_id(self):
         return self.get_inventory_number()
+
+    def get_title(self):
+        for lang, title_list in self.manifest.get("label", dict()).items():
+            yield self.__decorate_metadata_value("title", title_list[0], lang)
 
     def valid_manifest(self):
         if self.manifest.get("@context") not in self.presentation_contexts:
