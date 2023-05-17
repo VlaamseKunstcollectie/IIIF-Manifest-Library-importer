@@ -1,5 +1,11 @@
+certifi==2023.5.7
+charset-normalizer==3.1.0
 decorator==5.1.1
+elody==0.0.3
+idna==3.4
 lxml==4.9.2
 pyoai==2.5.0
+requests==2.30.0
 six==1.16.0
+urllib3==2.0.2
 validators==0.20.0
