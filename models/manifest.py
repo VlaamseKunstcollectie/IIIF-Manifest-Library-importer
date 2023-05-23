@@ -63,10 +63,21 @@ class Manifest:
     def get_metadata(self):
         metadata = list()
         metadata.extend(self.get_title())
+        metadata.extend(self.get_photographer())
         return metadata
 
     def get_object_id(self):
         return self.get_inventory_number()
+
+    def get_photographer(self):
+        for item in self.manifest.get("items", list()):
+            for metadata in item.get("metadata", list()):
+                if metadata.get("label", dict()).get("en", [""])[0] == "Photographer":
+                    yield self.__decorate_metadata_value(
+                        "photographer",
+                        metadata.get("value", dict()).get("none", [""])[0],
+                        "en",
+                    )
 
     def get_title(self):
         for lang, title_list in self.manifest.get("label", dict()).items():
