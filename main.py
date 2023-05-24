@@ -3,10 +3,11 @@ import os
 
 from elody import Client
 from elody.exceptions import NonUniqueException
+from importers.collection_importer import CollectionImporter
 from importers.lido_oai_pmh_importer import LidoOaiPmhImporter
 from datetime import datetime
 
-importers = [LidoOaiPmhImporter()]
+importers = [CollectionImporter(), LidoOaiPmhImporter()]
 elody_client = Client()
 parser = argparse.ArgumentParser()
 parser.add_argument("--from_time", type=str, help="Start date for OAI parse")
