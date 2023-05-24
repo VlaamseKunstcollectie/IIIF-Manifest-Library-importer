@@ -14,7 +14,7 @@ class Manifest:
         self.manifest = manifest
         self.valid_manifest()
 
-    def __decorate_metadata_value(self, key, value, lang="en"):
+    def _decorate_metadata_value(self, key, value, lang="en"):
         return {
             "key": key,
             "value": value,
@@ -73,7 +73,7 @@ class Manifest:
         for item in self.manifest.get("items", list()):
             for metadata in item.get("metadata", list()):
                 if metadata.get("label", dict()).get("en", [""])[0] == "Photographer":
-                    yield self.__decorate_metadata_value(
+                    yield self._decorate_metadata_value(
                         "photographer",
                         metadata.get("value", dict()).get("none", [""])[0],
                         "en",
@@ -81,7 +81,7 @@ class Manifest:
 
     def get_title(self):
         for lang, title_list in self.manifest.get("label", dict()).items():
-            yield self.__decorate_metadata_value("title", title_list[0], lang)
+            yield self._decorate_metadata_value("title", title_list[0], lang)
 
     def valid_manifest(self):
         if self.manifest.get("@context") not in self.presentation_contexts:
