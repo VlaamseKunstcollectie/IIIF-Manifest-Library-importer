@@ -2,6 +2,8 @@ import os
 
 from oaipmh.metadata import MetadataReader
 from importers.oai_pmh_importer import OaiPmhImporter
+from models.lido_manifest import LidoManifest
+from models.manifest import NoValidManifest
 
 lido_reader = MetadataReader(
     fields={
@@ -26,3 +28,27 @@ class LidoOaiPmhImporter(OaiPmhImporter):
     def __init__(self):
         lido_urls = os.getenv("LIDO_URLS", "").split(",")
         super().__init__(lido_urls, "oai_lido", lido_reader, "manifests", "types")
+
+    def _get_manifests_from_oai(self, client, from_date=None, until_date=None):
+        counter = 0
+        for record in client.listRecords(
+            metadataPrefix=self.metadata_prefix, from_=from_date, until=until_date
+        ):
+            manifest_urls = list()
+            if self.manifest_definition_field:
+                types = record[1].getField(self.manifest_definition_field)
+                if "IIIF Manifest" in types:
+                    manifest_urls.append(
+                        record[1].getField(self.manifest_field)[
+                            types.index("IIIF Manifest")
+                        ]
+                    )
+            else:
+                manifest_urls = record[1].getField(self.manifest_field)
+            for manifest_url in manifest_urls:
+                try:
+                    print(f"Processing entry {counter}/21797")
+                    yield LidoManifest.from_url(manifest_url)
+                    counter += 1
+                except NoValidManifest as ex:
+                    print(f"Couldn't parse manifest {manifest_url} because of {ex}")
