@@ -1,7 +1,12 @@
 import json
+import ssl
 import urllib.request
 
 from urllib.error import HTTPError, URLError
+
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 
 class Manifest:
@@ -37,7 +42,7 @@ class Manifest:
     def from_url(cls, manifest_url):
         manifest = dict()
         try:
-            with urllib.request.urlopen(manifest_url) as url:
+            with urllib.request.urlopen(manifest_url, context=ctx) as url:
                 manifest = json.load(url)
         except HTTPError as ex:
             print(f"Couldn't fetch manifest {manifest_url} because of {ex}")
