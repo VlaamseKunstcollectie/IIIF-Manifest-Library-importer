@@ -1,7 +1,7 @@
 import json
 import urllib.request
 
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 
 
 class Manifest:
@@ -40,6 +40,10 @@ class Manifest:
             with urllib.request.urlopen(manifest_url) as url:
                 manifest = json.load(url)
         except HTTPError as ex:
+            print(f"Couldn't fetch manifest {manifest_url} because of {ex}")
+        except URLError as ex:
+            print(f"Couldn't fetch manifest {manifest_url} because of {ex}")
+        except Exception as ex:
             print(f"Couldn't fetch manifest {manifest_url} because of {ex}")
         return cls(manifest)
 

@@ -2,6 +2,7 @@ import urllib.request
 
 from lxml import etree
 from models.manifest import Manifest
+from urllib.error import HTTPError
 
 lido_xpath = "/OAI:OAI-PMH/OAI:GetRecord/OAI:record/OAI:metadata/lido:lido"
 namespaces = {
@@ -169,9 +170,12 @@ class LidoManifest(Manifest):
     def _get_lido_metadata(self):
         lido_metadata = list()
         for lido_url in self._get_lido_urls():
-            with urllib.request.urlopen(lido_url) as lido_xml:
-                tree = etree.fromstring(lido_xml.read())
-                lido_metadata.extend(self.__parse_lido_metadata(tree))
+            try:
+                with urllib.request.urlopen(lido_url) as lido_xml:
+                    tree = etree.fromstring(lido_xml.read())
+                    lido_metadata.extend(self.__parse_lido_metadata(tree))
+            except (Exception, HTTPError) as ex:
+                print(f"Couldn't fetch extra metadata from {lido_url} because of {ex}")
         return lido_metadata
 
     def __parse_lido_metadata(self, tree):
