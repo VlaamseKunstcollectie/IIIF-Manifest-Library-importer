@@ -1,4 +1,5 @@
 import urllib.request
+import validators
 
 from lxml import etree
 from models.manifest import Manifest
@@ -170,6 +171,8 @@ class LidoManifest(Manifest):
     def _get_lido_metadata(self):
         lido_metadata = list()
         for lido_url in self._get_lido_urls():
+            if not validators.url(lido_url, public=True):
+                continue
             try:
                 with urllib.request.urlopen(lido_url) as lido_xml:
                     tree = etree.fromstring(lido_xml.read())
