@@ -59,12 +59,20 @@ class Manifest:
         ]
 
     def get_inventory_number(self):
+        if isinstance(self.manifest.get("metadata", list()), list):
+            for metadata in self.manifest.get("metadata", list()):
+                if metadata.get("label", "") == "Object ID":
+                    return metadata.get("value", "")
+            return ""
         for item in self.manifest.get("items", list()):
             for metadata in item.get("metadata", list()):
                 if metadata.get("label", dict()).get("en", [""])[0] == "Inventory no.":
                     return metadata.get("value", dict()).get("none", [""])[0]
 
     def get_manifest_id(self):
+        if "sequences" in self.manifest:
+            for sequence in self.manifest.get("sequences", list()):
+                return sequence.get("@id")
         for item in self.manifest.get("items", list()):
             if "id" in item:
                 return item.get("id")
@@ -89,8 +97,13 @@ class Manifest:
                     )
 
     def get_title(self):
-        for lang, title_list in self.manifest.get("label", dict()).items():
-            yield self._decorate_metadata_value("title", title_list[0], lang)
+        if isinstance(self.manifest.get("label", dict()), dict):
+            for lang, title_list in self.manifest.get("label", dict()).items():
+                yield self._decorate_metadata_value("title", title_list[0], lang)
+        elif isinstance(self.manifest.get("label", ""), str):
+            yield self._decorate_metadata_value(
+                "title", self.manifest.get("label", ""), "nl"
+            )
 
     def valid_manifest(self):
         if self.manifest.get("@context") not in self.presentation_contexts:
