@@ -3,7 +3,8 @@ import validators
 
 from oaipmh.metadata import oai_dc_reader
 from importers.oai_pmh_importer import OaiPmhImporter
-from models.manifest import Manifest, NoValidManifest
+from models.manifest import NoValidManifest
+from models.mpm_manifest import MpmManifest
 
 
 class MpmOaiPmhImporter(OaiPmhImporter):
@@ -25,7 +26,7 @@ class MpmOaiPmhImporter(OaiPmhImporter):
                 manifest_urls = self._get_iiif_urls_from_record(record)
             for manifest_url in manifest_urls:
                 try:
-                    yield Manifest.from_url(manifest_url)
+                    yield MpmManifest.from_url(manifest_url)
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")
 

@@ -1,0 +1,17 @@
+from models.manifest import Manifest
+
+
+class MpmManifest(Manifest):
+    def get_inventory_number(self):
+        for metadata in self.manifest.get("metadata", list()):
+            if metadata.get("label", "") == "Object ID":
+                return metadata.get("value", "")
+
+    def get_manifest_id(self):
+        for sequence in self.manifest.get("sequences", list()):
+            return sequence.get("@id")
+
+    def get_title(self):
+        yield self._decorate_metadata_value(
+            "title", self.manifest.get("label", ""), "nl"
+        )
