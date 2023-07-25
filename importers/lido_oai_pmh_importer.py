@@ -30,12 +30,9 @@ class LidoOaiPmhImporter(OaiPmhImporter):
         super().__init__(lido_urls, "oai_lido", lido_reader, "manifests", "types")
 
     def _get_manifests_from_oai(self, client, from_date=None, until_date=None):
-        counter = 0
         for record in client.listRecords(
             metadataPrefix=self.metadata_prefix, from_=from_date, until=until_date
         ):
-            if counter > 2000:
-                break
             manifest_urls = list()
             if self.manifest_definition_field:
                 types = record[1].getField(self.manifest_definition_field)
@@ -49,8 +46,6 @@ class LidoOaiPmhImporter(OaiPmhImporter):
                 manifest_urls = record[1].getField(self.manifest_field)
             for manifest_url in manifest_urls:
                 try:
-                    print(f"Processing entry {counter}/2000")
                     yield LidoManifest.from_url(manifest_url)
-                    counter += 1
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")
