@@ -81,6 +81,16 @@ class Manifest:
         metadata = list()
         metadata.extend(self.get_title())
         metadata.extend(self.get_photographer())
+        for manifest_metadata in self.manifest.get("metadata", list()):
+            if isinstance(manifest_metadata, dict):
+                label = manifest_metadata.get("label")
+                value = manifest_metadata.get("value")
+                if isinstance(label, str) and isinstance(value, str):
+                    metadata.append(
+                        self._decorate_metadata_value(
+                            label.lower().replace(" ", "_"), value, "en"
+                        )
+                    )
         return metadata
 
     def get_object_id(self):
