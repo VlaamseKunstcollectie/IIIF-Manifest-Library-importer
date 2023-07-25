@@ -22,5 +22,14 @@ class ObbCollectionImporter:
         for collection_url in self.collection_urls:
             with urllib.request.urlopen(collection_url) as url:
                 collection = json.load(url)
-                for manifest_item in collection.get("manifests", list()):
-                    yield self._get_manifest(manifest_item)
+                if "first" in collection:
+                    next_collection_url = collection.get("first")
+                while next_collection_url:
+                    print(f"Traversing {next_collection_url}")
+                    with urllib.request.urlopen(next_collection_url) as url:
+                        current_collection = json.load(url)
+                        next_collection_url = current_collection.get("next")
+                        for manifest_item in current_collection.get(
+                            "manifests", list()
+                        ):
+                            yield self._get_manifest(manifest_item)
