@@ -63,11 +63,19 @@ class Manifest:
             for metadata in item.get("metadata", list()):
                 if metadata.get("label", dict()).get("en", [""])[0] == "Inventory no.":
                     return metadata.get("value", dict()).get("none", [""])[0]
+        for metadata in self.manifest.get("metadata", list()):
+            if (
+                isinstance(metadata, dict)
+                and metadata.get("label") == "Alternative Identifier"
+            ):
+                return metadata.get("value")
 
     def get_manifest_id(self):
         for item in self.manifest.get("items", list()):
             if "id" in item:
                 return item.get("id")
+        if "@id" in self.manifest:
+            return self.manifest.get("@id")
 
     def get_metadata(self):
         metadata = list()
@@ -89,8 +97,15 @@ class Manifest:
                     )
 
     def get_title(self):
-        for lang, title_list in self.manifest.get("label", dict()).items():
-            yield self._decorate_metadata_value("title", title_list[0], lang)
+        if isinstance(self.manifest.get("label", dict()), dict):
+            for lang, title_list in self.manifest.get("label", dict()).items():
+                yield self._decorate_metadata_value("title", title_list[0], lang)
+        elif isinstance(self.manifest.get("label"), str):
+            yield self._decorate_metadata_value(
+                "title", self.manifest.get("label"), "nl"
+            )
+        else:
+            print(f"This manifest {self.manifest} has a strange label")
 
     def valid_manifest(self):
         if self.manifest.get("@context") not in self.presentation_contexts:
