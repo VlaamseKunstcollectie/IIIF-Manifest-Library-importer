@@ -88,7 +88,7 @@ class Manifest:
                 if isinstance(label, str) and isinstance(value, str):
                     metadata.append(
                         self._decorate_metadata_value(
-                            label.lower().replace(" ", "_"), value, "en"
+                            self.label_to_snake_case(label), value, "en"
                         )
                     )
         return metadata
@@ -116,6 +116,10 @@ class Manifest:
             )
         else:
             print(f"This manifest {self.manifest} has a strange label")
+
+    @staticmethod
+    def label_to_snake_case(label):
+        return label.lower().replace(" ", "_")
 
     def valid_manifest(self):
         if self.manifest.get("@context") not in self.presentation_contexts:
