@@ -18,7 +18,8 @@ class ObbCollectionImporter:
             except NoValidManifest as ex:
                 print(f"Couldn't parse manifest {manifest_url} because of {ex}")
 
-    def get_manifests(self, from_date=None, until_date=None):
+    def get_manifests(self, from_date=None, until_date=None, limit=None):
+        counter = 1
         for collection_url in self.collection_urls:
             with urllib.request.urlopen(collection_url) as url:
                 collection = json.load(url)
@@ -32,4 +33,9 @@ class ObbCollectionImporter:
                         for manifest_item in current_collection.get(
                             "manifests", list()
                         ):
+                            if limit:
+                                if counter > limit:
+                                    break
+                                print(f"Importing manifest {counter}/{limit}")
                             yield self._get_manifest(manifest_item)
+                            counter += 1

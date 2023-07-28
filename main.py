@@ -9,11 +9,17 @@ from importers.mpm_oai_pmh_importer import MpmOaiPmhImporter
 from importers.obb_collection_importer import ObbCollectionImporter
 from datetime import datetime
 
-importers = [ObbCollectionImporter(), CollectionImporter(), LidoOaiPmhImporter(), MpmOaiPmhImporter()]
+importers = [
+    ObbCollectionImporter(),
+    CollectionImporter(),
+    LidoOaiPmhImporter(),
+    MpmOaiPmhImporter(),
+]
 elody_client = Client()
 parser = argparse.ArgumentParser()
 parser.add_argument("--from_time", type=str, help="Start date for OAI parse")
 parser.add_argument("--until_time", type=str, help="End date for OAI parse")
+parser.add_argument("--limit", type=int, help="Limit amount of manifests per importer")
 
 
 def main():
@@ -22,9 +28,8 @@ def main():
     until_date = datetime.fromisoformat(args.until_time) if args.until_time else None
     for importer in importers:
         for manifest in importer.get_manifests(
-            from_date=from_date, until_date=until_date
+            from_date=from_date, until_date=until_date, limit=args.limit
         ):
-            print(manifest.as_elody_entity())
             try:
                 elody_client.add_object("entities", manifest.as_elody_entity())
             except NonUniqueException:

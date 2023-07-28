@@ -29,10 +29,15 @@ class LidoOaiPmhImporter(OaiPmhImporter):
         lido_urls = os.getenv("LIDO_URLS", "").split(",")
         super().__init__(lido_urls, "oai_lido", lido_reader, "manifests", "types")
 
-    def _get_manifests_from_oai(self, client, from_date=None, until_date=None):
+    def _get_manifests_from_oai(
+        self, client, from_date=None, until_date=None, limit=None
+    ):
+        counter = 1
         for record in client.listRecords(
             metadataPrefix=self.metadata_prefix, from_=from_date, until=until_date
         ):
+            if limit and counter > limit:
+                break
             manifest_urls = list()
             if self.manifest_definition_field:
                 types = record[1].getField(self.manifest_definition_field)
@@ -46,6 +51,9 @@ class LidoOaiPmhImporter(OaiPmhImporter):
                 manifest_urls = record[1].getField(self.manifest_field)
             for manifest_url in manifest_urls:
                 try:
+                    if limit:
+                        print(f"Importing manifest {counter}/{limit}")
                     yield LidoManifest.from_url(manifest_url)
+                    counter += 1
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")

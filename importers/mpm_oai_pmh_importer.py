@@ -17,16 +17,24 @@ class MpmOaiPmhImporter(OaiPmhImporter):
             if validators.url(identifier):
                 yield identifier.replace("/asset/", "/iiif/") + "/manifest"
 
-    def _get_manifests_from_oai(self, client, from_date=None, until_date=None):
+    def _get_manifests_from_oai(
+        self, client, from_date=None, until_date=None, limit=None
+    ):
+        counter = 1
         for record in client.listRecords(
             metadataPrefix=self.metadata_prefix, from_=from_date, until=until_date
         ):
+            if limit and counter > limit:
+                break
             manifest_urls = list()
             if self._is_public_mpm_record(record):
                 manifest_urls = self._get_iiif_urls_from_record(record)
             for manifest_url in manifest_urls:
                 try:
+                    if limit:
+                        print(f"Processing entry {counter}/{limit}")
                     yield MpmManifest.from_url(manifest_url)
+                    counter += 1
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")
 
