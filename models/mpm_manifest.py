@@ -16,11 +16,22 @@ class MpmManifest(Manifest):
         metadata.extend(self.get_attribution())
         metadata.extend(self.get_rights())
         for manifest_metadata in self.manifest.get("metadata", list()):
-            metadata.append(
-                self._decorate_metadata_value(
-                    self.label_to_snake_case(manifest_metadata.get("label")),
-                    manifest_metadata.get("value"),
-                    "nl",
+            value = manifest_metadata.get("value")
+            if isinstance(value, list):
+                for sub_value in value:
+                    metadata.append(
+                        self._decorate_metadata_value(
+                            self.label_to_snake_case(manifest_metadata.get("label")),
+                            sub_value,
+                            "nl",
+                        )
+                    )
+            else:
+                metadata.append(
+                    self._decorate_metadata_value(
+                        self.label_to_snake_case(manifest_metadata.get("label")),
+                        value,
+                        "nl",
+                    )
                 )
-            )
         return metadata
