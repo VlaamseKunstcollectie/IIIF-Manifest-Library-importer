@@ -52,6 +52,18 @@ class Manifest:
             print(f"Couldn't fetch manifest {manifest_url} because of {ex}")
         return cls(manifest)
 
+    def get_attribution(self):
+        required_statement = self.manifest.get("requiredStatement", dict())
+        label = required_statement.get("label")
+        value = required_statement.get("value")
+        if required_statement and label and value:
+            for language, attribution in value.items():
+                yield self._decorate_metadata_value(
+                    self.label_to_snake_case(label[language][0]),
+                    attribution[0],
+                    language,
+                )
+
     def get_identifiers(self):
         return [
             self.get_inventory_number(),
@@ -81,6 +93,8 @@ class Manifest:
         metadata = list()
         metadata.extend(self.get_title())
         metadata.extend(self.get_photographer())
+        metadata.extend(self.get_attribution())
+        metadata.extend(self.get_rights())
         for manifest_metadata in self.manifest.get("metadata", list()):
             if isinstance(manifest_metadata, dict):
                 label = manifest_metadata.get("label")
@@ -105,6 +119,15 @@ class Manifest:
                         metadata.get("value", dict()).get("none", [""])[0],
                         "en",
                     )
+
+    def get_rights(self):
+        rights = self.manifest.get("rights", self.manifest.get("license"))
+        if rights:
+            yield self._decorate_metadata_value(
+                "rights",
+                rights,
+                "en",
+            )
 
     def get_title(self):
         if isinstance(self.manifest.get("label", dict()), dict):

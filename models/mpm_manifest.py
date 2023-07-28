@@ -13,6 +13,8 @@ class MpmManifest(Manifest):
 
     def get_metadata(self):
         metadata = list()
+        metadata.extend(self.get_attribution())
+        metadata.extend(self.get_rights())
         for manifest_metadata in self.manifest.get("metadata", list()):
             metadata.append(
                 self._decorate_metadata_value(
