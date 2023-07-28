@@ -28,7 +28,9 @@ def main():
             try:
                 elody_client.add_object("entities", manifest.as_elody_entity())
             except NonUniqueException:
-                print("Manifest is already present in the system")
+                print(
+                    f"Manifest {manifest.get_manifest_id()} is already present in the system"
+                )
 
 
 if __name__ == "__main__":
