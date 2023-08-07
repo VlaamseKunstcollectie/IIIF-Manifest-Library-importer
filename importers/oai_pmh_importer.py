@@ -27,10 +27,15 @@ class OaiPmhImporter(BaseImporter):
             if validators.url(oai_url):
                 self.clients.append(Client(oai_url, registry))
 
-    def _get_manifests_from_oai(self, client, from_date=None, until_date=None):
+    def _get_manifests_from_oai(
+        self, client, from_date=None, until_date=None, limit=None
+    ):
+        counter = 1
         for record in client.listRecords(
             metadataPrefix=self.metadata_prefix, from_=from_date, until=until_date
         ):
+            if limit and counter > limit:
+                break
             manifest_urls = list()
             if self.manifest_definition_field:
                 types = record[1].getField(self.manifest_definition_field)
@@ -44,14 +49,16 @@ class OaiPmhImporter(BaseImporter):
                 manifest_urls = record[1].getField(self.manifest_field)
             for manifest_url in manifest_urls:
                 try:
+                    print(f"Processing entry {counter}/{limit}")
                     yield Manifest.from_url(manifest_url)
+                    counter += 1
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")
 
-    def get_manifests(self, from_date=None, until_date=None):
+    def get_manifests(self, from_date=None, until_date=None, limit=None):
         manifests = list()
         for client in self.clients:
             manifests.extend(
-                self._get_manifests_from_oai(client, from_date, until_date)
+                self._get_manifests_from_oai(client, from_date, until_date, limit)
             )
         return manifests
