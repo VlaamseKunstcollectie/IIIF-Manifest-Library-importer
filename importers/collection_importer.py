@@ -2,10 +2,11 @@ import json
 import os
 import urllib.request
 
+from importers.base_importer import BaseImporter
 from models.manifest import Manifest, NoValidManifest
 
 
-class CollectionImporter:
+class CollectionImporter(BaseImporter):
     def __init__(self, collection_urls=None):
         self.collection_urls = collection_urls or os.getenv(
             "COLLECTION_URLS", ""
