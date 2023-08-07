@@ -42,3 +42,6 @@ class MpmOaiPmhImporter(OaiPmhImporter):
         publishers = record[1].getField("publisher")
         rights = record[1].getField("rights")
         return "public" in rights and "Museum Plantin-Moretus (Antwerpen)" in publishers
+
+    def get_importer_name(self):
+        return "OAI-PMH Importer for MPM"

@@ -55,6 +55,9 @@ class OaiPmhImporter(BaseImporter):
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")
 
+    def get_importer_name(self):
+        return "OAI-PMH Importer"
+
     def get_manifests(self, from_date=None, until_date=None, limit=None):
         manifests = list()
         for client in self.clients:

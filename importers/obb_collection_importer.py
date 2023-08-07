@@ -19,6 +19,9 @@ class ObbCollectionImporter(BaseImporter):
             except NoValidManifest as ex:
                 print(f"Couldn't parse manifest {manifest_url} because of {ex}")
 
+    def get_importer_name(self):
+        return "Collection importer for OBB"
+
     def get_manifests(self, from_date=None, until_date=None, limit=None):
         counter = 1
         for collection_url in self.collection_urls:

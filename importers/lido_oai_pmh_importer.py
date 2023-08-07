@@ -57,3 +57,6 @@ class LidoOaiPmhImporter(OaiPmhImporter):
                     counter += 1
                 except NoValidManifest as ex:
                     print(f"Couldn't parse manifest {manifest_url} because of {ex}")
+
+    def get_importer_name(self):
+        return "OAI-PMH Importer for LIDO manifests"
