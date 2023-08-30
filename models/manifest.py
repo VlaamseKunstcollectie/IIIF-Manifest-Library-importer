@@ -1,8 +1,10 @@
 import json
+import re
 import ssl
 import urllib.request
 
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
@@ -109,6 +111,43 @@ class Manifest:
 
     def get_object_id(self):
         return self.get_inventory_number()
+
+    def get_institution(self):
+        institution_map = {
+            "imagehub.mskgent.be": "MSK Gent",
+            "resourcespace.muzee.be": "Muzee",
+            "dam.museabrugge.be": "Musea Brugge",
+            "dams.antwerpen.be": "Museum Plantin-Moretus",
+        }
+        institutions_in_statement = [
+            "Museum voor Schone Kunsten Gent",
+            "Mu.ZEE",
+            "Passchendaele Museum 1917",
+            "Koninklijk Museum voor Schone Kunsten Antwerpen",
+        ]
+        parsed_uri = urlparse(self.manifest.get("id", self.manifest.get("@id")))
+        institution_name = institution_map.get(parsed_uri.netloc)
+        if not institution_name:
+            required_statement = self.manifest.get("requiredStatement", dict()).get("value", dict()).get("nl", [""])[0]
+            for possible_institution in institutions_in_statement:
+                if possible_institution in required_statement:
+                    institution_name = possible_institution
+        if not institution_name:
+            print(self.manifest.get("id", self.manifest.get("@id")))
+            institution_search = re.search(r'(?<=Provided by ).+', self.manifest.get("attribution", ""))
+            if not institution_search:
+                return False
+            institution_name = institution_search.group(0)
+        return {
+            "type": "institution",
+            "metadata": [
+                {
+                    "key": "title",
+                    "value": institution_name,
+                    "lang": "nl",
+                }
+            ]
+        }
 
     def get_photographer(self):
         for item in self.manifest.get("items", list()):

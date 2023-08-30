@@ -35,16 +35,17 @@ def create_entity_for_importer(importer_name):
     }
     return elody_client.add_object("entities", entity)
 
-def get_manifest_importer_relation(importer_entity):
+def get_is_in_relation(target_entity, label):
     return [
         {
-            "label": "importer",
-            "key": importer_entity.get("_id"),
+            "label": label,
+            "key": target_entity.get("_id"),
             "type": "isIn",
         }
     ]
 
 def main():
+    unique_institutions = dict()
     args = parser.parse_args()
     from_date = datetime.fromisoformat(args.from_time) if args.from_time else None
     until_date = datetime.fromisoformat(args.until_time) if args.until_time else None
@@ -54,8 +55,16 @@ def main():
             from_date=from_date, until_date=until_date, limit=args.limit
         ):
             try:
+                institution = manifest.get_institution()
+                if not institution:
+                    continue
+                institution_title = institution.get("metadata", [dict()])[0].get("value")
+                if not institution_title in unique_institutions:
+                    unique_institutions[institution_title] = elody_client.add_object("entities", institution)
+                institution_entity = unique_institutions.get(institution_title)
                 entity = elody_client.add_object("entities", manifest.as_elody_entity())
-                elody_client.update_object_relations("entities", entity.get("_id"), get_manifest_importer_relation(importer_entity))
+                elody_client.update_object_relations("entities", entity.get("_id"), get_is_in_relation(importer_entity, "importer"))
+                elody_client.update_object_relations("entities", entity.get("_id"), get_is_in_relation(institution_entity, "institution"))
             except NonUniqueException:
                 print(
                     f"Manifest {manifest.get_manifest_id()} is already present in the system"
