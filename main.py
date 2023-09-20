@@ -31,9 +31,10 @@ def create_entity_for_importer(importer_name):
                 "value": importer_name,
                 "lang": "nl",
             }
-        ]
+        ],
     }
     return elody_client.add_object("entities", entity)
+
 
 def get_is_in_relation(target_entity, label):
     return [
@@ -43,6 +44,7 @@ def get_is_in_relation(target_entity, label):
             "type": "isIn",
         }
     ]
+
 
 def main():
     unique_institutions = dict()
@@ -58,13 +60,25 @@ def main():
                 institution = manifest.get_institution()
                 if not institution:
                     continue
-                institution_title = institution.get("metadata", [dict()])[0].get("value")
+                institution_title = institution.get("metadata", [dict()])[0].get(
+                    "value"
+                )
                 if not institution_title in unique_institutions:
-                    unique_institutions[institution_title] = elody_client.add_object("entities", institution)
+                    unique_institutions[institution_title] = elody_client.add_object(
+                        "entities", institution
+                    )
                 institution_entity = unique_institutions.get(institution_title)
                 entity = elody_client.add_object("entities", manifest.as_elody_entity())
-                elody_client.update_object_relations("entities", entity.get("_id"), get_is_in_relation(importer_entity, "importer"))
-                elody_client.update_object_relations("entities", entity.get("_id"), get_is_in_relation(institution_entity, "institution"))
+                elody_client.update_object_relations(
+                    "entities",
+                    entity.get("_id"),
+                    get_is_in_relation(importer_entity, "importer"),
+                )
+                elody_client.update_object_relations(
+                    "entities",
+                    entity.get("_id"),
+                    get_is_in_relation(institution_entity, "institution"),
+                )
             except NonUniqueException:
                 print(
                     f"Manifest {manifest.get_manifest_id()} is already present in the system"

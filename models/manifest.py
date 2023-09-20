@@ -129,13 +129,19 @@ class Manifest:
         parsed_uri = urlparse(self.manifest.get("id", self.manifest.get("@id")))
         institution_name = institution_map.get(parsed_uri.netloc)
         if not institution_name:
-            required_statement = self.manifest.get("requiredStatement", dict()).get("value", dict()).get("nl", [""])[0]
+            required_statement = (
+                self.manifest.get("requiredStatement", dict())
+                .get("value", dict())
+                .get("nl", [""])[0]
+            )
             for possible_institution in institutions_in_statement:
                 if possible_institution in required_statement:
                     institution_name = possible_institution
         if not institution_name:
             print(self.manifest.get("id", self.manifest.get("@id")))
-            institution_search = re.search(r'(?<=Provided by ).+', self.manifest.get("attribution", ""))
+            institution_search = re.search(
+                r"(?<=Provided by ).+", self.manifest.get("attribution", "")
+            )
             if not institution_search:
                 return False
             institution_name = institution_search.group(0)
@@ -147,7 +153,7 @@ class Manifest:
                     "value": institution_name,
                     "lang": "nl",
                 }
-            ]
+            ],
         }
 
     def get_manifest_url_as_metadata(self):
