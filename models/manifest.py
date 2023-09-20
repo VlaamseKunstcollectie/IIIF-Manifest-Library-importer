@@ -17,8 +17,9 @@ class Manifest:
         "http://iiif.io/api/presentation/3/context.json",
     ]
 
-    def __init__(self, manifest):
+    def __init__(self, manifest, manifest_url=None):
         self.manifest = manifest
+        self.manifest_url = manifest_url
         self.valid_manifest()
 
     def _decorate_metadata_value(self, key, value, lang="en"):
@@ -52,7 +53,7 @@ class Manifest:
             print(f"Couldn't fetch manifest {manifest_url} because of {ex}")
         except Exception as ex:
             print(f"Couldn't fetch manifest {manifest_url} because of {ex}")
-        return cls(manifest)
+        return cls(manifest, manifest_url)
 
     def get_attribution(self):
         required_statement = self.manifest.get("requiredStatement", dict())
@@ -157,11 +158,10 @@ class Manifest:
         }
 
     def get_manifest_url_as_metadata(self):
-        manifest_url = self.get_manifest_id()
-        if manifest_url:
+        if self.manifest_url:
             yield self._decorate_metadata_value(
                 "manifest_url",
-                manifest_url,
+                self.manifest_url,
                 "en",
             )
 
