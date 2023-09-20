@@ -97,6 +97,7 @@ class Manifest:
         metadata.extend(self.get_photographer())
         metadata.extend(self.get_attribution())
         metadata.extend(self.get_rights())
+        metadata.extend(self.get_manifest_url_as_metadata())
         for manifest_metadata in self.manifest.get("metadata", list()):
             if isinstance(manifest_metadata, dict):
                 label = manifest_metadata.get("label")
@@ -148,6 +149,15 @@ class Manifest:
                 }
             ]
         }
+
+    def get_manifest_url_as_metadata(self):
+        manifest_url = self.get_manifest_id()
+        if manifest_url:
+            yield self._decorate_metadata_value(
+                "manifest_url",
+                manifest_url,
+                "en",
+            )
 
     def get_photographer(self):
         for item in self.manifest.get("items", list()):

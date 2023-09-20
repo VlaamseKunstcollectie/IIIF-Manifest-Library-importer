@@ -15,6 +15,7 @@ class MpmManifest(Manifest):
         metadata = list()
         metadata.extend(self.get_attribution())
         metadata.extend(self.get_rights())
+        metadata.extend(self.get_manifest_url_as_metadata())
         for manifest_metadata in self.manifest.get("metadata", list()):
             value = manifest_metadata.get("value")
             if isinstance(value, list):
