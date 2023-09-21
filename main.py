@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import os
 
 from elody import Client
@@ -25,6 +26,7 @@ parser.add_argument("--limit", type=int, help="Limit amount of manifests per imp
 def create_entity_for_importer(importer_name):
     entity = {
         "type": "importer",
+        "identifiers": [hashlib.md5(importer_name.encode()).hexdigest()],
         "metadata": [
             {
                 "key": "title",

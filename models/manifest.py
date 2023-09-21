@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 import ssl
@@ -149,6 +150,7 @@ class Manifest:
             institution_name = institution_search.group(0)
         return {
             "type": "institution",
+            "identifiers": [hashlib.md5(institution_name.encode()).hexdigest()],
             "metadata": [
                 {
                     "key": "title",
