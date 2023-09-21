@@ -99,6 +99,7 @@ class Manifest:
         metadata.extend(self.get_attribution())
         metadata.extend(self.get_rights())
         metadata.extend(self.get_manifest_url_as_metadata())
+        metadata.extend(self.get_manifest_version_as_metadata())
         for manifest_metadata in self.manifest.get("metadata", list()):
             if isinstance(manifest_metadata, dict):
                 label = manifest_metadata.get("label")
@@ -164,6 +165,19 @@ class Manifest:
                 self.manifest_url,
                 "en",
             )
+
+    def get_manifest_version(self):
+        versions = re.findall(r"[0-9]", self.manifest.get("@context"))
+        if versions:
+            return versions[0]
+        return "unknown version"
+
+    def get_manifest_version_as_metadata(self):
+        yield self._decorate_metadata_value(
+            "manifest_version",
+            self.get_manifest_version(),
+            "en",
+        )
 
     def get_photographer(self):
         for item in self.manifest.get("items", list()):
