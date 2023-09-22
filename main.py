@@ -1,6 +1,7 @@
 import argparse
 import hashlib
 import os
+import validators
 
 from elody import Client
 from elody.exceptions import NonUniqueException
@@ -23,6 +24,18 @@ parser.add_argument("--until_time", type=str, help="End date for OAI parse")
 parser.add_argument("--limit", type=int, help="Limit amount of manifests per importer")
 
 
+def add_or_update_entity(entity):
+    try:
+        entity = elody_client.add_object("entities", entity)
+    except NonUniqueException as error:
+        for identifier in entity.get("identifiers", []):
+            if not validators.url(identifier):
+                print(f"Updating {identifier} instead of adding")
+                entity = elody_client.update_object("entities", identifier, entity)
+                break
+    return entity
+
+
 def create_entity_for_importer(importer_name):
     entity = {
         "type": "importer",
@@ -35,7 +48,7 @@ def create_entity_for_importer(importer_name):
             }
         ],
     }
-    return elody_client.add_object("entities", entity)
+    return add_or_update_entity(entity)
 
 
 def get_is_in_relation(target_entity, label):
@@ -49,7 +62,6 @@ def get_is_in_relation(target_entity, label):
 
 
 def main():
-    unique_institutions = dict()
     args = parser.parse_args()
     from_date = datetime.fromisoformat(args.from_time) if args.from_time else None
     until_date = datetime.fromisoformat(args.until_time) if args.until_time else None
@@ -58,33 +70,22 @@ def main():
         for manifest in importer.get_manifests(
             from_date=from_date, until_date=until_date, limit=args.limit
         ):
-            try:
-                institution = manifest.get_institution()
-                if not institution:
-                    continue
-                institution_title = institution.get("metadata", [dict()])[0].get(
-                    "value"
-                )
-                if not institution_title in unique_institutions:
-                    unique_institutions[institution_title] = elody_client.add_object(
-                        "entities", institution
-                    )
-                institution_entity = unique_institutions.get(institution_title)
-                entity = elody_client.add_object("entities", manifest.as_elody_entity())
-                elody_client.update_object_relations(
-                    "entities",
-                    entity.get("_id"),
-                    get_is_in_relation(importer_entity, "importer"),
-                )
-                elody_client.update_object_relations(
-                    "entities",
-                    entity.get("_id"),
-                    get_is_in_relation(institution_entity, "institution"),
-                )
-            except NonUniqueException:
-                print(
-                    f"Manifest {manifest.get_manifest_id()} is already present in the system"
-                )
+            institution = manifest.get_institution()
+            if not institution:
+                continue
+            institution_title = institution.get("metadata", [dict()])[0].get("value")
+            institution_entity = add_or_update_entity(institution)
+            entity = add_or_update_entity(manifest.as_elody_entity())
+            elody_client.update_object_relations(
+                "entities",
+                entity.get("_id"),
+                get_is_in_relation(importer_entity, "importer"),
+            )
+            elody_client.update_object_relations(
+                "entities",
+                entity.get("_id"),
+                get_is_in_relation(institution_entity, "institution"),
+            )
 
 
 if __name__ == "__main__":
