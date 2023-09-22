@@ -29,9 +29,15 @@ def add_or_update_entity(entity):
         entity = elody_client.add_object("entities", entity)
     except NonUniqueException as error:
         for identifier in entity.get("identifiers", []):
-            if not validators.url(identifier):
+            if not validators.url(identifier) and not "/" in identifier:
                 print(f"Updating {identifier} instead of adding")
-                entity = elody_client.update_object("entities", identifier, entity)
+                try:
+                    entity = elody_client.update_object("entities", identifier, entity)
+                except:
+                    entity = None
+                    print(
+                        "Something went wrong updating, probably incorrect use of inventory numbers"
+                    )
                 break
     return entity
 
@@ -76,16 +82,17 @@ def main():
             institution_title = institution.get("metadata", [dict()])[0].get("value")
             institution_entity = add_or_update_entity(institution)
             entity = add_or_update_entity(manifest.as_elody_entity())
-            elody_client.update_object_relations(
-                "entities",
-                entity.get("_id"),
-                get_is_in_relation(importer_entity, "importer"),
-            )
-            elody_client.update_object_relations(
-                "entities",
-                entity.get("_id"),
-                get_is_in_relation(institution_entity, "institution"),
-            )
+            if entity:
+                elody_client.update_object_relations(
+                    "entities",
+                    entity.get("_id"),
+                    get_is_in_relation(importer_entity, "importer"),
+                )
+                elody_client.update_object_relations(
+                    "entities",
+                    entity.get("_id"),
+                    get_is_in_relation(institution_entity, "institution"),
+                )
 
 
 if __name__ == "__main__":
