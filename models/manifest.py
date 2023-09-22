@@ -34,9 +34,16 @@ class Manifest:
         return self.manifest
 
     def as_elody_entity(self):
+        if self.get_object_id():
+            return {
+                "type": "manifest",
+                "object_id": self.get_object_id(),
+                "identifiers": self.get_identifiers(),
+                "metadata": self.get_metadata(),
+                "data": self.manifest,
+            }
         return {
             "type": "manifest",
-            "object_id": self.get_object_id(),
             "identifiers": self.get_identifiers(),
             "metadata": self.get_metadata(),
             "data": self.manifest,
@@ -69,9 +76,15 @@ class Manifest:
                 )
 
     def get_identifiers(self):
+        if self.get_inventory_number():
+            return [
+                self.get_inventory_number(),
+                self.get_manifest_id(),
+                hashlib.md5(self.get_manifest_id().encode()).hexdigest(),
+            ]
         return [
-            self.get_inventory_number(),
             self.get_manifest_id(),
+            hashlib.md5(self.get_manifest_id().encode()).hexdigest(),
         ]
 
     def get_inventory_number(self):
