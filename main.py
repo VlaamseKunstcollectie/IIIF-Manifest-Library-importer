@@ -57,9 +57,10 @@ def create_entity_for_importer(importer_name):
     return add_or_update_entity(entity)
 
 
-def get_is_in_relation(target_entity, label):
+def get_is_in_relation(target_entity, label, relation_value):
     return [
         {
+            "value": relation_value,
             "label": label,
             "key": target_entity.get("_id"),
             "type": "isIn",
@@ -86,12 +87,12 @@ def main():
                 elody_client.update_object_relations(
                     "entities",
                     entity.get("_id"),
-                    get_is_in_relation(importer_entity, "importer"),
+                    get_is_in_relation(importer_entity, "importer", importer.get_importer_name()),
                 )
                 elody_client.update_object_relations(
                     "entities",
                     entity.get("_id"),
-                    get_is_in_relation(institution_entity, "institution"),
+                    get_is_in_relation(institution_entity, "institution", institution_title),
                 )
 
 
