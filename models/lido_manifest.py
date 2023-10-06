@@ -1,9 +1,10 @@
-import urllib.request
+import os
+import requests
 import validators
 
 from lxml import etree
 from models.manifest import Manifest
-from urllib.error import HTTPError
+from requests.exceptions import ConnectionError
 
 lido_xpath = "/OAI:OAI-PMH/OAI:GetRecord/OAI:record/OAI:metadata/lido:lido"
 namespaces = {
@@ -170,14 +171,24 @@ class LidoManifest(Manifest):
 
     def _get_lido_metadata(self):
         lido_metadata = list()
+        lido_username = os.getenv("LIDO_USERNAME")
+        lido_password = os.getenv("LIDO_PASSWORD")
         for lido_url in self._get_lido_urls():
             if not validators.url(lido_url, public=True):
                 continue
             try:
-                with urllib.request.urlopen(lido_url) as lido_xml:
-                    tree = etree.fromstring(lido_xml.read())
-                    lido_metadata.extend(self.__parse_lido_metadata(tree))
-            except (Exception, HTTPError) as ex:
+                if lido_username and lido_password:
+                    lido_xml = requests.get(
+                        lido_url, auth=(lido_username, lido_password)
+                    )
+                else:
+                    lido_xml = requests.get(lido_url)
+                if lido_xml.status_code != 200:
+                    print(f"Status code not 200 {lido_xml}")
+                    continue
+                tree = etree.fromstring(lido_xml.content)
+                lido_metadata.extend(self.__parse_lido_metadata(tree))
+            except (Exception, ConnectionError) as ex:
                 print(f"Couldn't fetch extra metadata from {lido_url} because of {ex}")
         return lido_metadata
 
