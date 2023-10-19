@@ -87,12 +87,16 @@ def main():
                 elody_client.update_object_relations(
                     "entities",
                     entity.get("_id"),
-                    get_is_in_relation(importer_entity, "importer", importer.get_importer_name()),
+                    get_is_in_relation(
+                        importer_entity, "importer", importer.get_importer_name()
+                    ),
                 )
                 elody_client.update_object_relations(
                     "entities",
                     entity.get("_id"),
-                    get_is_in_relation(institution_entity, "institution", institution_title),
+                    get_is_in_relation(
+                        institution_entity, "institution", institution_title
+                    ),
                 )
 
 
