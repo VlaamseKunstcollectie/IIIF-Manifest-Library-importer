@@ -30,6 +30,41 @@ class Manifest:
             "lang": lang,
         }
 
+    def _get_possible_thumbnail_url(self, scenario):
+        try:
+            match scenario:
+                case 0:
+                    return (
+                        self.manifest.get("sequences", list())[0]
+                        .get("canvases", list())[0]
+                        .get("images", list())[0]
+                        .get("resource", dict())
+                        .get("service", dict())
+                        .get("@id")
+                        + "/full/400,/0/default.jpg"
+                    )
+                case 1:
+                    return (
+                        self.manifest.get("sequences", list())[0]
+                        .get("canvases", list())[0]
+                        .get("thumbnail", dict())
+                        .get("@id")
+                    )
+                case 2:
+                    return (
+                        self.manifest.get("items", list())[0]
+                        .get("thumbnail", dict())[0]
+                        .get("id")
+                    )
+                case _:
+                    return (
+                        self.manifest.get("items", list())[0]
+                        .get("thumbnail", dict())
+                        .get("id")
+                    )
+        except Exception:
+            return None
+
     def as_dict(self):
         return self.manifest
 
@@ -112,6 +147,7 @@ class Manifest:
         metadata.extend(self.get_photographer())
         metadata.extend(self.get_attribution())
         metadata.extend(self.get_rights())
+        metadata.extend(self.get_manifest_thumbnail_as_metadata())
         metadata.extend(self.get_manifest_url_as_metadata())
         metadata.extend(self.get_manifest_version_as_metadata())
         for manifest_metadata in self.manifest.get("metadata", list()):
@@ -172,6 +208,15 @@ class Manifest:
                 }
             ],
         }
+
+    def get_manifest_thumbnail_as_metadata(self):
+        for scenario in range(0, 3):
+            if thumbnail_url := self._get_possible_thumbnail_url(scenario):
+                yield self._decorate_metadata_value(
+                    "thumbnail_url",
+                    thumbnail_url,
+                    "en",
+                )
 
     def get_manifest_url_as_metadata(self):
         if self.manifest_url:
