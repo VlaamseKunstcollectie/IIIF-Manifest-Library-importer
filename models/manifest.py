@@ -75,13 +75,11 @@ class Manifest:
                 "object_id": self.get_object_id(),
                 "identifiers": self.get_identifiers(),
                 "metadata": self.get_metadata(),
-                "data": self.manifest,
             }
         return {
             "type": "manifest",
             "identifiers": self.get_identifiers(),
             "metadata": self.get_metadata(),
-            "data": self.manifest,
         }
 
     @classmethod
