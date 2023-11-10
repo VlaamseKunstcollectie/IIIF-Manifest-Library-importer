@@ -28,6 +28,8 @@ def add_or_update_entity(entity):
     try:
         entity = elody_client.add_object("entities", entity)
     except NonUniqueException as error:
+        if entity.get("type") == "institution":
+            return entity
         for identifier in entity.get("identifiers", []):
             if not validators.url(identifier) and not "/" in identifier:
                 print(f"Updating {identifier} instead of adding")
