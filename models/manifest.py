@@ -98,12 +98,11 @@ class Manifest:
 
     def get_attribution(self):
         required_statement = self.manifest.get("requiredStatement", dict())
-        label = required_statement.get("label")
         value = required_statement.get("value")
-        if required_statement and label and value:
+        if required_statement and value:
             for language, attribution in value.items():
                 yield self._decorate_metadata_value(
-                    self.label_to_snake_case(label[language][0]),
+                    self.label_to_snake_case("requiredStatement"),
                     attribution[0],
                     language,
                 )
